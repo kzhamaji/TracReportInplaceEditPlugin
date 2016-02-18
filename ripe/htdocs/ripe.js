@@ -44,6 +44,7 @@ $(document).ready(function() {
             var field_info = JSON.parse(JSON.stringify(field_infos[field_name]));
             var field_value;
             var field_dom;
+            var input_width = 'none';
             if (field_info['type'] == "select") {
 		field_value = $.trim(cell.text());
                 if (!(field_value in field_info['options'])) {
@@ -59,6 +60,7 @@ $(document).ready(function() {
                 if (field_name == "summary") {
                     field_dom = cell.find('a');
                     field_value = $.trim(field_dom.text());
+                    input_width = field_dom.width();
                 }
                 else {
             	    field_value = $.trim(cell.contents().filter(function(){
@@ -116,7 +118,7 @@ $(document).ready(function() {
                 id          : 'id',
                 name        : 'value',
                 style       : 'inherit',
-                width       : 'none',
+                width       : input_width,
                 select      : true,
                 placeholder : '',
                 indicator   : '<img src="'+base_url+'/chrome/ripe/indicator.gif">',
