@@ -13,6 +13,7 @@ import inspect
 import time
 import textwrap
 import urllib
+from datetime import datetime
 
 # trac modules
 from trac.core import *
@@ -21,8 +22,11 @@ from trac.util.html import html
 from trac.web.chrome import add_script, add_stylesheet
 from trac.web.api import RequestDone
 from trac.ticket import Ticket, TicketSystem
+from trac.ticket.notification import TicketNotifyEmail
 from trac.util import get_reporter_id
-from trac.config import Option
+from trac.util.datefmt import utc
+from trac.util.text import exception_to_unicode
+from trac.config import Option, BoolOption
 
 # trac interfaces for components
 from trac.perm import IPermissionRequestor
@@ -51,6 +55,9 @@ class RipeModule(Component):
 
     change_comment = Option('ripe', 'comment', "Updated from report",
                             'Comment for ticket change')
+
+    enable_notification = BoolOption('ripe', 'notification', False,
+                                     'Enable notification.')
 
     implements(
                 IPermissionRequestor,
@@ -185,11 +192,17 @@ class RipeModule(Component):
         ticket.populate(params)
 
         # save ticket
+        now = datetime.now(utc)
         comment = self.change_comment
-        if len(comment) == 0:
-            comment = None
         author = get_reporter_id(req, 'author')
-        ticket.save_changes(author, comment)
+        cnum = ticket.save_changes(author, comment, when=now)
+        if cnum and self.enable_notification:
+            tn = TicketNotifyEmail(self.env)
+            try:
+                tn.notify(ticket, newticket=False, modtime=now)
+            except Exception, e:
+                self.log.error("Failure sending notification on change to "
+                        "ticket #%s: %s", ticket.id, exception_to_unicode(e))
 
         return value
 
