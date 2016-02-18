@@ -22,6 +22,7 @@ from trac.web.chrome import add_script, add_stylesheet
 from trac.web.api import RequestDone
 from trac.ticket import Ticket, TicketSystem
 from trac.util import get_reporter_id
+from trac.config import Option
 
 # trac interfaces for components
 from trac.perm import IPermissionRequestor
@@ -47,6 +48,9 @@ from i18n_domain import gettext, _, tag_, N_, add_domain
 __all__ = ['RipeModule']
 
 class RipeModule(Component):
+
+    change_comment = Option('ripe', 'comment', "Updated from report",
+                            'Comment for ticket change')
 
     implements(
                 IPermissionRequestor,
@@ -181,7 +185,9 @@ class RipeModule(Component):
         ticket.populate(params)
 
         # save ticket
-        comment = "Updated from report"
+        comment = self.change_comment
+        if len(comment) == 0:
+            comment = None
         author = get_reporter_id(req, 'author')
         ticket.save_changes(author, comment)
 
