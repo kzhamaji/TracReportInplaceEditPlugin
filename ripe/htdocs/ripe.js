@@ -43,8 +43,9 @@ $(document).ready(function() {
             // clone field_info
             var field_info = JSON.parse(JSON.stringify(field_infos[field_name]));
 
-
-            var field_value = $.trim(cell.text());
+            var field_value = $.trim(cell.contents().filter(function(){
+				return this.nodeType == Node.TEXT_NODE;
+			      })[0].nodeValue);
             if (field_info['type'] == "select") {
                 if (!(field_value in field_info['options'])) {
                     // add current value to options
@@ -54,6 +55,9 @@ $(document).ready(function() {
                 if (field_info['options'][field_value] == field_value) {
                     field_info['options']["selected"] = field_value;
                 }
+            }
+            else if (field_info['type'] == "text") {
+              field_info['options'] = field_value;
             }
 
             var onSaveSubmit = function(settings, original) {
