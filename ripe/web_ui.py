@@ -137,7 +137,6 @@ class RipeModule(Component):
         always_skip_fields = {
             "id": None,
             "ticket": None,
-            "summary": None,
             "description": None,
             "cc": None,
             "changetime": None,

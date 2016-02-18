@@ -42,11 +42,10 @@ $(document).ready(function() {
 
             // clone field_info
             var field_info = JSON.parse(JSON.stringify(field_infos[field_name]));
-
-            var field_value = $.trim(cell.contents().filter(function(){
-				return this.nodeType == Node.TEXT_NODE;
-			      })[0].nodeValue);
+            var field_value;
+            var field_dom;
             if (field_info['type'] == "select") {
+		field_value = $.trim(cell.text());
                 if (!(field_value in field_info['options'])) {
                     // add current value to options
                     field_info['options'][field_value] = field_value;
@@ -57,7 +56,16 @@ $(document).ready(function() {
                 }
             }
             else if (field_info['type'] == "text") {
-              field_info['options'] = field_value;
+                if (field_name == "summary") {
+                    field_dom = cell.find('a');
+                    field_value = $.trim(field_dom.text());
+                }
+                else {
+            	    field_value = $.trim(cell.contents().filter(function(){
+				      return this.nodeType == Node.TEXT_NODE;
+			          })[0].nodeValue);
+                }
+                field_info['options'] = field_value;
             }
 
             var onSaveSubmit = function(settings, original) {
@@ -92,6 +100,12 @@ $(document).ready(function() {
                     settings.data = field_info['options'];
                     settings.data["selected"] = $.trim(cell.text());
                 }
+                else if (field_info['type'] == "text") {
+		    if (field_name == "summary") {
+                       field_dom.text(cell.text());
+                       cell.html(field_dom);
+		    }
+                }
             };
 
             // jeditable
@@ -113,7 +127,7 @@ $(document).ready(function() {
                 onsubmit    : onSaveSubmit,
                 callback    : onSaveSuccess,
                 onerror     : onSaveError,
-                tooltip     : 'Edit'
+                tooltip     : 'Edit',
             });
 
         });
