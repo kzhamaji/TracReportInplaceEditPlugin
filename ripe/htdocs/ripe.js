@@ -130,6 +130,7 @@ $(document).ready(function() {
                 callback    : onSaveSuccess,
                 onerror     : onSaveError,
                 tooltip     : 'Edit',
+		event       : 'dblclick',
             });
 
         });
